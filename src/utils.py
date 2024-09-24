@@ -9,7 +9,6 @@ def filtered_transactions_by_date(transactions: list[dict], input_date_str: str)
     end_date = input_date
 
 
-
 def greeting() -> str:
     """
     Функция, определяющая дату и время, и осуществляет приветсвие исходя из этих данных
@@ -54,7 +53,6 @@ def get_info_cards(transactions: list[dict]) -> list[dict]:
             card_info
 
 
-
 def get_top_transaction(transactions: list[dict]) -> list[dict]:
     """
     Функция, принимающая список транзакций, выводящая 5 с наибольшей суммой операции
@@ -71,5 +69,3 @@ def get_top_transaction(transactions: list[dict]) -> list[dict]:
              })
         )
     return top_transactions
-
-
