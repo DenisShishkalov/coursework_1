@@ -2,6 +2,10 @@ import re
 
 from src.config import file_operations_xlsx
 from src.utils import reading_to_file
+from src.logger import launch_logging
+
+
+logger = launch_logging('services', 'logs/services.log')
 
 
 def search_transfers_to_individuals(transactions: list[dict]) -> list[dict]:
@@ -15,6 +19,7 @@ def search_transfers_to_individuals(transactions: list[dict]) -> list[dict]:
         description = transaction.get('Описание')
         if category == "Переводы" and search_pattern.search(description):
             operations_.append(transaction)
+    logger.info('Выполнен поиск транзакций, совершенных физическим лицам')
     return operations_
 
 
