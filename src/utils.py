@@ -1,17 +1,16 @@
-import os
 from datetime import datetime, timedelta
 from typing import Any
 
 import pandas as pd
 import requests
 
-from src.config import file_operations_xlsx, api_key_currency, api_key_stocks
+
 from src.logger import launch_logging
 
 logger = launch_logging('utils', 'logs/utils.log')
 
 
-def greeting() -> str:
+def greeting() -> str:   # finish
     """
     Функция, определяющая дату и время, и осуществляет приветсвие исходя из этих данных
     """
@@ -31,7 +30,7 @@ def greeting() -> str:
         return 'Доброй ночи!'
 
 
-def reading_to_file(path: str) -> list[dict]:
+def reading_to_file(path: str) -> list[dict]:   # finish
     """Функция, принимающая путь до excel файла, и возвращающая список словарей с финансовыми операциями"""
 
     try:
@@ -44,64 +43,64 @@ def reading_to_file(path: str) -> list[dict]:
         return []
 
 
-def filtered_transactions_by_date(transactions: list[dict], input_date_str: str) -> list[dict]:
-    """Функция, фильтрующая список транзакций по дате"""
-    input_date = datetime.strptime(input_date_str, '%d.%m.%Y')
+def conversion_date(date_str: str) -> datetime:   # finish
+    """Функция переводит дату из формата строки в формат datetime"""
+    return datetime.strptime(date_str, "%d.%m.%Y %H:%M:%S")
+
+
+def filter_transactions_by_date(transactions: list[dict], input_date_str: str) -> list[dict]:   # finish дата дд.мм.гггг
+    """Функция принимает список словарей с транзакциями и дату
+    фильтрует транзакции с начала месяца, на который выпадает входящая дата по входящую дату."""
+    input_date = datetime.strptime(input_date_str, "%d.%m.%Y")
     end_date = input_date + timedelta(days=1)
     start_date = datetime(end_date.year, end_date.month, 1)
-
-    def conversion_date(date_str: str) -> datetime:
-        """Функция преобразования даты из формата строки в формат dt"""
-        return datetime.strptime(date_str, "%d.%m.%Y %H:%M:%S")
-
-    filtered_transaction = [transaction for transaction in transactions if
-                            start_date <= conversion_date(transaction, ["Дата операции"]) <= end_date]
-    logger.info(f'Транзакции отфильтрованы по дате с{start_date} по {end_date}')
-    return filtered_transaction
+    filtered_transactions = [transaction for transaction in transactions
+                             if start_date <= conversion_date(transaction["Дата операции"]) <= end_date
+                             ]
+    logger.info(f"Все операции отфильтрованы по дате с {start_date} по {end_date}")
+    return filtered_transactions
 
 
-def get_info_cards(transactions: list[dict]) -> list[dict]:
-    """
-    Функция, получающая список словарей с операциями, и возвращающая информацию:
-     - последние 4 цифры карты;
-     - общая сумма расходов;
-     - кешбэк (1 рубль на каждые 100 рублей).
-    """
-    card_info = {}
+def get_info_cards(transactions: list[dict]) -> list[dict]:   # finish
+    """Функция создает словарь с ключоми номеров карт и в значения добавляет сумму трат и сумму кэшбека"""
+    card_data = {}
     for transaction in transactions:
-        card_number = transaction.get['Номер карты']
+        card_number = transaction.get("Номер карты")
+        # если поле номер карты пустое операцию пропускаем т.к. не понятно к какой карте привязать трату
         if not card_number or str(card_number).strip().lower() == "nan":
             continue
-        amount = transaction.get('Сумма операции')
-        if card_number not in card_info:
-            card_info[card_number] = {'total_spent': 0.0, 'cashback': 0.0}
+        amount = float(transaction["Сумма операции"])
+        if card_number not in card_data:
+            card_data[card_number] = {"total_spent": 0.0, "cashback": 0.0}
         if amount < 0:
-            card_info[card_number]['total_spent'] += abs(amount)
-            cashback = transactions.get('Кэшбэк')
-            if transaction['Категория'] != 'Переводы' and transaction['Категория'] != 'Наличные':
-                if cashback is not None:
-                    cashback_amount = float(cashback)
+            card_data[card_number]["total_spent"] += abs(amount)
+            cashback_value = transaction.get("Кэшбэк")
+
+            if transaction["Категория"] != "Переводы" and transaction["Категория"] != "Наличные":
+
+                if cashback_value is not None:
+                    cashback_amount = float(cashback_value)
                     if cashback_amount >= 0:
-                        card_info[card_number]['cashback'] = + cashback_amount
+                        card_data[card_number]["cashback"] += cashback_amount
                     else:
-                        card_info[card_number]['cashback'] += amount * -0.01
+                        card_data[card_number]["cashback"] += amount * -0.01
                 else:
-                    card_info[card_number]['cashback'] += amount * -0.01
+                    card_data[card_number]["cashback"] += amount * -0.01
     logger.info('посчитали сумму кэшбэка  и сумму на карте')
-    card_info = []
-    for last_digits, info in card_info.items():
-        card_info.append(
+    cards_data = []
+    for last_digits, data in card_data.items():
+        cards_data.append(
             {
-                'last_digits': last_digits,
-                'total_spent': round(info['total_spent'], 2),
-                'cashback': round(info['cashback'], 2),
+                "last_digits": last_digits,
+                "total_spent": round(data["total_spent"], 2),
+                "cashback": round(data["cashback"], 2),
             }
         )
     logger.info('получена информация о кэшбэке и тратам по каждой карте')
-    return card_info
+    return cards_data
 
 
-def get_top_transaction(transactions: list[dict]) -> list[dict]:
+def get_top_5_transaction(transactions: list[dict]) -> list[dict]:   # finish
     """
     Функция, принимающая список транзакций, выводящая 5 с наибольшей суммой операции
     """
@@ -118,6 +117,9 @@ def get_top_transaction(transactions: list[dict]) -> list[dict]:
         )
     logger.info('Функция выделила топ 5 транзакций по сумме платежа')
     return top_transactions
+
+
+# print(get_top_5_transaction(reading_to_file(r'../data/operations_excel.xlsx')))
 
 
 def get_exchange_rate(currency: list[str], api_key_currency: Any) -> list[dict]:
@@ -144,7 +146,7 @@ def get_exchange_rate(currency: list[str], api_key_currency: Any) -> list[dict]:
     return exchange_rates
 
 
-def share_price(stock_list: list[str]) -> list[dict[str, [str | int]]]:
+def share_price(stock_list: list[str], api_key_stocks: Any) -> list[dict[str, [str | int]]]:
     """Функция получающая курс акций"""
     stocks_rate = []
     for stock in stock_list:

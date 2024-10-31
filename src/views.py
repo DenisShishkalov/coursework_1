@@ -5,11 +5,11 @@ from typing import Any
 
 from src.utils import (
     filtered_transactions_by_date,
-    get_info_cards,
+    # get_info_cards,
     reading_to_file,
-    get_exchange_rate,
-    share_price,
-    get_top_transaction,
+    # get_exchange_rate,
+    # share_price,
+    # get_top_transaction,
     greeting,
 )
 

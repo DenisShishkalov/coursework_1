@@ -1,13 +1,7 @@
-from pathlib import Path
 import os
 from dotenv import load_dotenv
 
 from src.utils import reading_to_file
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / 'data'
-
-file_operations_xlsx = DATA_DIR / 'operations_excel.xlsx'
 
 load_dotenv()
 
@@ -22,4 +16,4 @@ year = 2020
 month = 5
 date = '2020.05'
 limit = 50
-search = 'Перевод'
+search = 'РџРµСЂРµРІРѕРґ'
