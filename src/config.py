@@ -8,7 +8,7 @@ load_dotenv()
 api_key_currency = os.getenv('API_KEY_CURRENCY')
 api_key_stocks = os.getenv('API_KEY_STOCKS')
 
-input_date = '20.03.2020'
+input_date = '07.03.2019'
 
 transactions = reading_to_file(r'../data/operations_excel.xlsx')
 

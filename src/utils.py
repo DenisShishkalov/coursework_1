@@ -66,7 +66,6 @@ def get_info_cards(transactions: list[dict]) -> list[dict]:   # finish
     card_data = {}
     for transaction in transactions:
         card_number = transaction.get("Номер карты")
-        # если поле номер карты пустое операцию пропускаем т.к. не понятно к какой карте привязать трату
         if not card_number or str(card_number).strip().lower() == "nan":
             continue
         amount = float(transaction["Сумма операции"])
@@ -119,47 +118,52 @@ def get_top_5_transaction(transactions: list[dict]) -> list[dict]:   # finish
     return top_transactions
 
 
-# print(get_top_5_transaction(reading_to_file(r'../data/operations_excel.xlsx')))
-
-
-def get_exchange_rate(currency: list[str], api_key_currency: Any) -> list[dict]:
+def get_exchange_rates(currencies: list[str], api_key_currency: Any) -> list[dict]:
     """
-    Функция получения курса валют
+    Ффункция, принимающая список валют, и возвращающая их курс в виде словаря
     """
     exchange_rates = []
-    for cur in currency:
-        url = f'https://v6.exchangerate-api.com/v6/{api_key_currency}/latest/{currency}'
+
+    for currency in currencies:
+        url = f"https://v6.exchangerate-api.com/v6/{api_key_currency}/latest/{currency}"  # сделали запрос на сайт по курсу валют
         response = requests.get(url)
-        logger.info('Запрос на курс валют отправлен')
-        if response.status_code == 200:
+        logger.info("Выполнили запрос на курс валют")
+        if response.status_code == 200:  # код работает
             data = response.json()
-
-            logger.info(f'получен ответ от сервера о курсе валют {data}')
-
-            rub_cost = data['conversion_rates']['RUB']
-            exchange_rates.append({'currency': cur, 'rate': rub_cost})
+            logger.info(f"Получен ответ от api сервера о курсе валют и сформирован в виде json ответа: {data}")
+            ruble_cost = data["conversion_rates"]["RUB"]
+            exchange_rates.append({"currency": currency, "rate": ruble_cost})
         else:
             print(f"Ошибка: {response.status_code}, {response.text}")
-            logger.error(f"Ошибка api запроса {response.status_code}, {response.text}")
+            logger.error(f"Произошла ошибка: {response.status_code}, {response.text}")
             exchange_rates.append({"currency": currency, "rate": None})
-    logger.info('Созданы курсы валют')
+    logger.info("Сформирован отчет о курсе валют")
     return exchange_rates
 
 
-def share_price(stock_list: list[str], api_key_stocks: Any) -> list[dict[str, [str | int]]]:
-    """Функция получающая курс акций"""
-    stocks_rate = []
-    for stock in stock_list:
-        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={stock}&apikey={api_key_stocks}"
+def get_stocks_cost(companies: list[str], api_key_stocks: Any) -> list[dict]:
+    """Функция принимает список кодов компаний и возвращает стоимость их акций"""
+    stocks_cost = []
+    for company in companies:
+        url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={company}&apikey={api_key_stocks}"
         response = requests.get(url)
-        status_code = response.status_code
-        if status_code == 200:
-            res = response.json()
-            date = res["Meta Data"]["3. Last Refreshed"]
-            new_dict = {"stock": stock, "price": round(float(res["Time Series (Daily)"][f"{date}"]["2. high"]), 2)}
-            stocks_rate.append(new_dict)
+        logger.info("Запрос на курс акций отправлен на api сервер")
+        if response.status_code == 200:
+            data = response.json()
+            logger.info(f"Получен ответ от api курса акций: {data}")
+            time_series = data.get("Time Series (Daily)")
+            if time_series:
+                latest_date = max(time_series.keys())
+                latest_data = time_series[latest_date]
+                stock_cost = latest_data["4. close"]
+                stocks_cost.append({"stock": company, "price": float(stock_cost)})
+            else:
+                print(f"Ошибка: данные для компании {company} недоступны. API ответ {data}")
+                logger.error(f"Ошибка ответа: {data}")
+                stocks_cost.append({"stock": company, "price": None})
         else:
-            logger.info("Произошла ощибка")
-            print("Произошла ошибка")
-    logger.info("Данные по курсу акций успешно получены")
-    return stocks_rate
+            print(f"Ошибка: {response.status_code}, {response.text}")
+            logger.error(f"Ошибка api запроса {response.status_code}, {response.text}")
+            stocks_cost.append({"stock": company, "price": None})
+    logger.info("Стоимость акций создана")
+    return stocks_cost

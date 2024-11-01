@@ -4,32 +4,28 @@ from dotenv import load_dotenv
 from typing import Any
 
 from src.utils import (
-    filtered_transactions_by_date,
-    # get_info_cards,
+    filter_transactions_by_date,
     reading_to_file,
-    # get_exchange_rate,
-    # share_price,
-    # get_top_transaction,
-    greeting,
+    greeting, get_top_5_transaction, get_stocks_cost, get_exchange_rates, get_info_cards,
 )
 
-with open("../user_settings.json", "r") as file:
+with open(r"../user_setting.json", "r") as file:
     user_choice = json.load(file)
 load_dotenv()
 api_key_currency = os.getenv("API_KEY_CURRENCY")
 api_key_stocks = os.getenv("API_KEY_STOCKS")
-input_date_str = "20.03.2020"
+input_date_str = "07.03.2019"
 
 
-def main(input_date: Any, user_settings: Any, api_key_currency: Any, api_key_stocks: Any) -> Any:
+def main(input_date: Any, user_setting: Any, api_key_currency: Any, api_key_stocks: Any) -> Any:
     """Основная функция для генерации JSON-ответа."""
-    path = r"../data/operations.xls"
+    path = r"../data/operations_excel.xlsx"
     transactions = reading_to_file(path)
-    filtered_transactions = filtered_transactions_by_date(transactions, input_date)
+    filtered_transactions = filter_transactions_by_date(transactions, input_date)
     cards_data = get_info_cards(filtered_transactions)
-    exchange_rates = get_exchange_rate(user_settings["user_currencies"], api_key_currency)
-    stocks_cost = share_price(user_settings["user_stocks"], api_key_stocks)
-    top_transactions = get_top_transaction(filtered_transactions)
+    exchange_rates = get_exchange_rates(user_setting["user_currencies"], api_key_currency)
+    stocks_cost = get_stocks_cost(user_setting["user_stocks"], api_key_stocks)
+    top_transactions = get_top_5_transaction(filtered_transactions)
     greetings = greeting()
     user_data = {
         "greeting": greetings,
