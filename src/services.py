@@ -2,7 +2,6 @@ import json
 import re
 
 from src.logger import launch_logging
-from src.utils import reading_to_file
 
 logger = launch_logging('services', 'logs/services.log')
 
