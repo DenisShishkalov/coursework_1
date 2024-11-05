@@ -4,13 +4,12 @@ from typing import Any
 import pandas as pd
 import requests
 
-
 from src.logger import launch_logging
 
 logger = launch_logging('utils', 'logs/utils.log')
 
 
-def greeting() -> str:   # finish
+def greeting() -> str:  # finish
     """
     Функция, определяющая дату и время, и осуществляет приветсвие исходя из этих данных
     """
@@ -18,19 +17,19 @@ def greeting() -> str:   # finish
     current_hour = now.hour
     if 6 < current_hour < 10:
         logger.info('Выполнилось приветствие доброе утро')
-        return 'Доброе утро!'
+        return 'Доброе утро'
     elif 10 < current_hour < 18:
         logger.info('Выполнилось приветствие добрый день')
-        return 'Добрый день!'
+        return 'Добрый день'
     elif 18 < current_hour < 22:
         logger.info('Выполнилось приветствие добрый вече')
-        return 'Доброй вечер !'
+        return 'Добрый вечер'
     else:
         logger.info('Выполнилось приветствие доброй ночи!')
-        return 'Доброй ночи!'
+        return 'Доброй ночи'
 
 
-def reading_to_file(path: str) -> list[dict]:   # finish
+def reading_to_file(path: str) -> list[dict]:  # finish
     """Функция, принимающая путь до excel файла, и возвращающая список словарей с финансовыми операциями"""
 
     try:
@@ -43,12 +42,12 @@ def reading_to_file(path: str) -> list[dict]:   # finish
         return []
 
 
-def conversion_date(date_str: str) -> datetime:   # finish
+def conversion_date(date_str: str) -> datetime:  # finish
     """Функция переводит дату из формата строки в формат datetime"""
     return datetime.strptime(date_str, "%d.%m.%Y %H:%M:%S")
 
 
-def filter_transactions_by_date(transactions: list[dict], input_date_str: str) -> list[dict]:   # finish дата дд.мм.гггг
+def filter_transactions_by_date(transactions: list[dict], input_date_str: str) -> list[dict]:  # finish дата дд.мм.гггг
     """Функция принимает список словарей с транзакциями и дату
     фильтрует транзакции с начала месяца, на который выпадает входящая дата по входящую дату."""
     input_date = datetime.strptime(input_date_str, "%d.%m.%Y")
@@ -61,7 +60,7 @@ def filter_transactions_by_date(transactions: list[dict], input_date_str: str) -
     return filtered_transactions
 
 
-def get_info_cards(transactions: list[dict]) -> list[dict]:   # finish
+def get_info_cards(transactions: list[dict]) -> list[dict]:  # finish
     """Функция создает словарь с ключоми номеров карт и в значения добавляет сумму трат и сумму кэшбека"""
     card_data = {}
     for transaction in transactions:
@@ -99,11 +98,11 @@ def get_info_cards(transactions: list[dict]) -> list[dict]:   # finish
     return cards_data
 
 
-def get_top_5_transaction(transactions: list[dict]) -> list[dict]:   # finish
+def get_top_5_transaction(transactions: list[dict]) -> list[dict]:  # finish
     """
     Функция, принимающая список транзакций, выводящая 5 с наибольшей суммой операции
     """
-    sorted_transactions = sorted(transactions, key=lambda x: abs(float(x['Сумма платежа'])), reverse=True)
+    sorted_transactions = sorted(transactions, key=lambda x: abs(float(x['Сумма операции'])), reverse=True)
     top_transactions = []
     for trans in sorted_transactions[:5]:
         date = datetime.strptime(trans["Дата операции"], "%d.%m.%Y %H:%M:%S").strftime("%d.%m.%Y")
@@ -112,8 +111,7 @@ def get_top_5_transaction(transactions: list[dict]) -> list[dict]:   # finish
              'amount': trans["Сумма операции"],
              'category': trans['Категория'],
              'description': trans['Описание']
-             })
-        )
+             }))
     logger.info('Функция выделила топ 5 транзакций по сумме платежа')
     return top_transactions
 
@@ -125,7 +123,7 @@ def get_exchange_rates(currencies: list[str], api_key_currency: Any) -> list[dic
     exchange_rates = []
 
     for currency in currencies:
-        url = f"https://v6.exchangerate-api.com/v6/{api_key_currency}/latest/{currency}"  # сделали запрос на сайт по курсу валют
+        url = f"https://v6.exchangerate-api.com/v6/{api_key_currency}/latest/{currency}"
         response = requests.get(url)
         logger.info("Выполнили запрос на курс валют")
         if response.status_code == 200:  # код работает
