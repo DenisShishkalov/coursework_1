@@ -39,7 +39,7 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Any = 
         ]
         grouped_transactions = filtered_transactions.groupby(pd.Grouper(key="Дата операции", freq="ME")).sum()
         logger.info(f"Траты за последние три месяца от {date} по категории {category}")
-        return grouped_transactions.to_dict(orient="records", )
+        return grouped_transactions.to_dict(orient="records")
     except Exception as e:
         print(f"Возникла ошибка {e}")
         logger.error(f"Возникла ошибка {e}")
