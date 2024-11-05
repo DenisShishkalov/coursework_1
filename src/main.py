@@ -7,12 +7,12 @@ from src.views import main, user_choice
 
 
 # web
-# main_page = main(input_date, user_choice, api_key_currency, api_key_stocks)
-# print(main_page)
+main_page = main(input_date, user_choice, api_key_currency, api_key_stocks)
+print(main_page)
 #
 # # сервис
-# find_person_to_person_transactions_result = search_transfers_to_individuals(src.config.transactions)
-# print(find_person_to_person_transactions_result)
+find_person_to_person_transactions_result = search_transfers_to_individuals(src.config.transactions)
+print(find_person_to_person_transactions_result)
 
 
 # отчёты
