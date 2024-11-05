@@ -1,6 +1,19 @@
-from pathlib import Path
+import os
+from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / 'data'
+from src.utils import reading_to_file
 
-file_transaction_xlsx = DATA_DIR / 'transactions_excel.xlsx'
+load_dotenv()
+
+api_key_currency = os.getenv('API_KEY_CURRENCY')
+api_key_stocks = os.getenv('API_KEY_STOCKS')
+
+input_date = '07.03.2019'
+
+transactions = reading_to_file(r'../data/operations_excel.xlsx')
+
+year = 2020
+month = 5
+date = '2020.05'
+limit = 50
+search = 'Перевод'
